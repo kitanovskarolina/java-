@@ -1,0 +1,233 @@
+Here's a Java application called "DirectoryExplorer" that fulfills the requirements you provided:
+
+```java
+import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Scanner;
+
+public class DirectoryExplorer {
+
+    private static final String PROMPT = "DirectoryExplorer> ";
+    private static final String COMMAND_NAVIGATE = "navigate";
+    private static final String COMMAND_LIST = "list";
+    private static final String COMMAND_SEARCH_FILES = "search-files";
+    private static final String COMMAND_DETAILS = "details";
+    private static final String COMMAND_LIST_SIZE = "list-size";
+    private static final String COMMAND_COMPARE = "compare";
+    private static final String COMMAND_TREE_VIEW = "tree-view";
+    private static final String COMMAND_FILTER_EXTENSION = "filter-extension";
+    private static final String COMMAND_EXIT = "exit";
+
+    private static File currentDirectory;
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Welcome to DirectoryExplorer!");
+        currentDirectory = new File(System.getProperty("user.dir"));
+
+        while (true) {
+            System.out.print(PROMPT);
+            String input = scanner.nextLine().trim();
+            String[] commandParts = input.split("\\s+");
+            String command = commandParts[0];
+
+            switch (command) {
+                case COMMAND_NAVIGATE:
+                    navigate(commandParts);
+                    break;
+                case COMMAND_LIST:
+                    listContents();
+                    break;
+                case COMMAND_SEARCH_FILES:
+                    searchFiles(commandParts);
+                    break;
+                case COMMAND_DETAILS:
+                    fileDetails(commandParts);
+                    break;
+                case COMMAND_LIST_SIZE:
+                    listBySize(commandParts);
+                    break;
+                case COMMAND_COMPARE:
+                    compareFiles(commandParts);
+                    break;
+                case COMMAND_TREE_VIEW:
+                    treeView();
+                    break;
+                case COMMAND_FILTER_EXTENSION:
+                    filterByExtension(commandParts);
+                    break;
+                case COMMAND_EXIT:
+                    System.out.println("Exiting DirectoryExplorer. Goodbye!");
+                    return;
+                default:
+                    System.out.println("Invalid command. Please try again.");
+            }
+        }
+    }
+
+    private static void navigate(String[] commandParts) {
+        if (commandParts.length != 2) {
+            System.out.println("Invalid command. Usage: navigate <path>");
+            return;
+        }
+
+        String path = commandParts[1];
+        File newDirectory = new File(currentDirectory, path);
+
+        if (!newDirectory.exists() || !newDirectory.isDirectory()) {
+            System.out.println("Invalid directory path.");
+            return;
+        }
+
+        currentDirectory = newDirectory;
+        System.out.println("Current directory changed to: " + currentDirectory.getAbsolutePath());
+    }
+
+    private static void listContents() {
+        System.out.println("Listing contents of: " + currentDirectory.getAbsolutePath());
+        File[] files = currentDirectory.listFiles();
+        if (files != null) {
+            for (File file : files) {
+                System.out.println(file.getName());
+            }
+        }
+    }
+
+    private static void searchFiles(String[] commandParts) {
+        if (commandParts.length != 2) {
+            System.out.println("Invalid command. Usage: search-files <keyword>");
+            return;
+        }
+
+        String keyword = commandParts[1].toLowerCase();
+        searchFilesRecursive(currentDirectory, keyword);
+    }
+
+    private static void searchFilesRecursive(File directory, String keyword) {
+        File[] files = directory.listFiles();
+        if (files != null) {
+            for (File file : files) {
+                if (file.isDirectory()) {
+                    searchFilesRecursive(file, keyword);
+                } else if (file.getName().toLowerCase().contains(keyword)) {
+                    System.out.println(file.getAbsolutePath());
+                }
+            }
+        }
+    }
+
+    private static void fileDetails(String[] commandParts) {
+        if (commandParts.length != 2) {
+            System.out.println("Invalid command. Usage: details <filename>");
+            return;
+        }
+
+        String filename = commandParts[1];
+        File file = new File(currentDirectory, filename);
+        if (!file.exists()) {
+            System.out.println("File not found.");
+            return;
+        }
+
+        System.out.println("File details:");
+        System.out.println("Name: " + file.getName());
+        System.out.println("Path: " + file.getAbsolutePath());
+        System.out.println("Size: " + file.length() + " bytes");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        System.out.println("Last Modified: " + sdf.format(new Date(file.lastModified())));
+        System.out.println("Type: " + (file.isDirectory() ? "Directory" : "File"));
+    }
+
+    private static void listBySize(String[] commandParts) {
+        if (commandParts.length != 3) {
+            System.out.println("Invalid command. Usage: list-size <min-size> <max-size>");
+            return;
+        }
+
+        long minSize = Long.parseLong(commandParts[1]);
+        long maxSize = Long.parseLong(commandParts[2]);
+        listBySizeRecursive(currentDirectory, minSize, maxSize);
+    }
+
+    private static void listBySizeRecursive(File directory, long minSize, long maxSize) {
+        File[] files = directory.listFiles();
+        if (files != null) {
+            for (File file : files) {
+                if (file.isDirectory()) {
+                    listBySizeRecursive(file, minSize, maxSize);
+                } else {
+                    long fileSize = file.length();
+                    if (fileSize >= minSize && fileSize <= maxSize) {
+                        System.out.println(file.getAbsolutePath() + " - " + fileSize + " bytes");
+                    }
+                }
+            }
+        }
+    }
+
+    private static void compareFiles(String[] commandParts) {
+        if (commandParts.length != 3) {
+            System.out.println("Invalid command. Usage: compare <file1> <file2>");
+            return;
+        }
+
+        File file1 = new File(currentDirectory, commandParts[1]);
+        File file2 = new File(currentDirectory, commandParts[2]);
+
+        if (!file1.exists() || !file2.exists()) {
+            System.out.println("One or both files do not exist.");
+            return;
+        }
+
+        if (file1.length() != file2.length()) {
+            System.out.println("Files are not identical.");
+        } else {
+            System.out.println("Files are identical.");
+        }
+    }
+
+    private static void treeView() {
+        System.out.println("Directory tree view of: " + currentDirectory.getAbsolutePath());
+        printDirectoryTree(currentDirectory, 0);
+    }
+
+    private static void printDirectoryTree(File directory, int level) {
+        File[] files = directory.listFiles();
+        if (files != null) {
+            for (File file : files) {
+                for (int i = 0; i < level; i++) {
+                    System.out.print("|  ");
+                }
+                System.out.println("|--" + file.getName());
+                if (file.isDirectory()) {
+                    printDirectoryTree(file, level + 1);
+                }
+            }
+        }
+    }
+
+    private static void filterByExtension(String[] commandParts) {
+        if (commandParts.length != 2) {
+            System.out.println("Invalid command. Usage: filter-extension <extension>");
+            return;
+        }
+
+        String extension = commandParts[1];
+        System.out.println("Files with extension '" + extension + "' in: " + currentDirectory.getAbsolutePath());
+        filterByExtensionRecursive(currentDirectory, extension);
+    }
+
+    private static void filterByExtensionRecursive(File directory, String extension) {
+        File[] files = directory.listFiles();
+        if (files != null) {
+            for (File file : files) {
+                if (file.isDirectory()) {
+                    filterByExtensionRecursive(file, extension);
+                } else if (file.getName().toLowerCase().endsWith(extension.toLowerCase())) {
+                    System.out.println(file.getAbsolutePath());
+                }
+            }
+        }
+    }
+}
