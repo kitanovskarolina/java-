@@ -152,4 +152,3 @@ public class TrafficInfoClient {
 }
 
 
-Creating java project, then two separate classes for the server and client and then text file
