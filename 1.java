@@ -1,4 +1,3 @@
-Trafic data server:
 
 import java.io.*;
 import java.net.*;
@@ -118,9 +117,7 @@ public class TrafficDataServer {
 }
 
 
-client:
 
-Client server:
 
 import java.io.*;
 import java.net.*;
