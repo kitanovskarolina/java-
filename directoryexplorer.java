@@ -1,4 +1,3 @@
-Here's a Java application called "DirectoryExplorer" that fulfills the requirements you provided:
 
 ```java
 import java.io.File;
